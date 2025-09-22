@@ -42,9 +42,9 @@ func (l *LogEntry) Insert(entry LogEntry) error {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	})
-
 	if err != nil {
 		log.Println("Error inserting into logs:", err)
+		return err
 	}
 
 	return nil
@@ -60,12 +60,10 @@ func (l *LogEntry) All() ([]*LogEntry, error) {
 	opts.SetSort(bson.D{{"created_at", -1}})
 
 	cursor, err := collection.Find(context.TODO(), bson.D{}, opts)
-
 	if err != nil {
-		log.Println("Finding all codcs error:", err)
+		log.Println("Finding all docs error:", err)
 		return nil, err
 	}
-
 	defer cursor.Close(ctx)
 
 	var logs []*LogEntry
@@ -74,7 +72,6 @@ func (l *LogEntry) All() ([]*LogEntry, error) {
 		var item LogEntry
 
 		err := cursor.Decode(&item)
-
 		if err != nil {
 			log.Print("Error decoding log into slice:", err)
 			return nil, err
@@ -84,7 +81,6 @@ func (l *LogEntry) All() ([]*LogEntry, error) {
 	}
 
 	return logs, nil
-
 }
 
 func (l *LogEntry) GetOne(id string) (*LogEntry, error) {
@@ -103,6 +99,7 @@ func (l *LogEntry) GetOne(id string) (*LogEntry, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &entry, nil
 }
 
@@ -141,4 +138,10 @@ func (l *LogEntry) Update() (*mongo.UpdateResult, error) {
 			}},
 		},
 	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
